@@ -1,19 +1,27 @@
-from werkzeug.security import generate_password_hash, check_password_hash
 from shophive_packages import db
 
+"""
+This module defines the User model, representing users in the database.
+"""
+
+
 class User(db.Model):
+    """
+    Represents a user in the ShopHive platform.
+
+    Attributes:
+        id (int): Primary key for the user.
+        username (str): Unique username for the user.
+        email (str): Unique email for the user.
+        password (str): Hashed password for the user.
+    """
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)  
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
 
     def __repr__(self):
+        """
+        Returns a string representation of the User object.
+        """
         return f'<User {self.username}>'
-
-    # Set the password hash
-    def set_password(self, password):
-        self.password = generate_password_hash(password)
-
-    # Check if the password matches
-    def check_password(self, password):
-        return check_password_hash(self.password, password)

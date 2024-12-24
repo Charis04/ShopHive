@@ -1,6 +1,7 @@
 import os
 from typing import Tuple
 from flask import Flask, render_template, request
+from flask_jwt_extended import JWTManager
 from flask_login import (
     LoginManager,
     login_required,
@@ -9,38 +10,18 @@ from flask_login import (
     current_user,
 )
 from flask_migrate import Migrate
-from flask_restful import Api
-from shophive_packages import db
-from shophive_packages.routes.cart_routes import CartResource
+import os
 
-# Initialize Flask application
-app: Flask = Flask(__name__, template_folder="shophive_packages/templates")
-login_manager = LoginManager(app)
-login_manager.login_view = "login"
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Configure SQLAlchemy database URI and settings
-
-# Uncomment the lines below for testing with an in-memory database
-# app.config["TESTING"] = True
-# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
-
-# Uncomment the line below for local development with a local database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = os.getenv(
-    "SECRET_KEY"
-)  # Added secret key for session management
-
-# Initialize the database and migration objects with the app
 db.init_app(app)
+jwt = JWTManager(app)
 migrate = Migrate(app, db)
 
-# Debug: Print registered tables to ensure models are loaded correctly
-with app.app_context():
-    from shophive_packages.models import Product, User, Cart
-
-    print(f"Registered tables: {db.metadata.tables.keys()}")
+# Register routes
+from shophive_packages.routes.user_routes import *
 
 # Initialize Flask-RESTful API
 api: Api = Api(app)
